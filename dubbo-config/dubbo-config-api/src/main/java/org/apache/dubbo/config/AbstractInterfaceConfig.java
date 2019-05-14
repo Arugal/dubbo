@@ -179,7 +179,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 if (sysaddress != null && sysaddress.length() > 0) {
                     address = sysaddress;
                 }
-                // 有效的地址  and N/A
+                //  ignore N/A -> unregistries
                 if (address.length() > 0 && !RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
                     // 将配置对象的参数添加到 Map 中
@@ -206,8 +206,8 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     for (URL url : urls) {
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
                         url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
-                        if ((provider && url.getParameter(Constants.REGISTER_KEY, true)) // 服务提供者 -> 判断是只订阅不
-                                || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) { // 服务消费者 -> 判断是否只注册不订阅
+                        if ((provider && url.getParameter(Constants.REGISTER_KEY, true)) // provider == true && register == true -> register provider
+                                || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) { // provider == false && subscribe == true -> register consumer
                             registryList.add(url);
                         }
                     }

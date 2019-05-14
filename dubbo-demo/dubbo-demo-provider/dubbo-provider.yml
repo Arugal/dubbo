@@ -1,0 +1,21 @@
+version: '3.1'
+
+services:
+  dubbo1:
+    image: dubbo-provider:1.0
+    environment:
+      protocol.port: 9002
+    network_mode: host
+    container_name: dubbo1
+  dubbo2:
+    image: dubbo-provider:1.0
+    environment:
+      protocol.port: 9003
+    network_mode: host
+    container_name: dubbo2
+  dubbo3:
+    image: dubbo-provider:1.0
+    environment:
+      protocol.port: 9004
+    network_mode: host
+    container_name: dubbo3

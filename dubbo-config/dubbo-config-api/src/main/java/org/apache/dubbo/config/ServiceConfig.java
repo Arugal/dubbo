@@ -282,7 +282,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             }
         }
         // 泛化接口实现
-        if (ref instanceof GenericService) {
+        if (ref instanceof GenericService) { // 有一种 proxy 的味道
             interfaceClass = GenericService.class;
             // generic 默认为 true
             if (StringUtils.isEmpty(generic)) {
@@ -296,7 +296,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
-            // 。。。
+            // MethodConfig 配置的正确性
             checkInterfaceAndMethods(interfaceClass, methods);
             // 校验 ref 实例对象是否继承了 interfaceClass
             checkRef();
@@ -335,7 +335,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         checkRegistry();
         checkProtocol();
         appendProperties(this);
-        // 校验 Stub 和 Mock 相关的配置
+        // 校验 Stub 和 Mock 相关的配置,猜测用于熔断处理
         checkStubAndMock(interfaceClass);
         if (path == null || path.length() == 0) {
             path = interfaceName;
@@ -383,7 +383,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         // 加载注册中心 URL 数组
         List<URL> registryURLs = loadRegistries(true);
         // 循环 protocol 逐个向注册中心暴露服务
-        for (ProtocolConfig protocolConfig : protocols) {
+        for (ProtocolConfig protocolConfig : protocols) { // any protocol -> any registry
             doExportUrlsFor1Protocol(protocolConfig, registryURLs);
         }
     }
@@ -547,7 +547,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                             registryURL = registryURL.addParameter(Constants.PROXY_KEY, proxy);
                         }
 
-                        // 使用 ProxyFactory 创建 Invoker 对象
+                        // 使用 ProxyFactory 创建 Invoker 对象 此处 getInvoker 传入的是 registryUrl
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
 
                         // 创建 DelegateProviderMetaDataInvoker

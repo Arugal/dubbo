@@ -379,7 +379,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             }
         } else {
             // 定义直连地址，可以是服务提供者的地址，也可以是注册中心的地址
-            if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
+            if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address. 点对点调用
                 String[] us = Constants.SEMICOLON_SPLIT_PATTERN.split(url); // 拆分成数组，使用"；"分割
                 if (us != null && us.length > 0) {
                     for (String u : us) {
@@ -387,9 +387,14 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                         if (url.getPath() == null || url.getPath().length() == 0) {
                             url = url.setPath(interfaceName);
                         }
+                        // 检测 URL 协议是否为 registry,若是，表明用户想使用指定的注册中心
                         if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
+                            // 将 map 转换为查询字符串，并作为 refer 参数的指添加到 url 中
                             urls.add(url.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
                         } else {
+                            // 合并 url,移除服务提供者的一些配置（这些配置来源于用户配置的 url 属性），
+                            // 比如线程池相关配置，并保留服务提供者的部分配置，比如版本， group, 时间戳等
+                            // 最后将合并发的配置设置为 url 查询字符串中
                             urls.add(ClusterUtils.mergeUrl(url, map));
                         }
                     }
@@ -424,7 +429,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 URL registryURL = null;
                 for (URL url : urls) {
                     // 引用服务
-                    invokers.add(refprotocol.refer(interfaceClass, url));
+                    invokers.add(refprotocol.refer(interfaceClass, url)); // registryURL
                     // 使用最后一个注册中心的 URL
                     if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
                         registryURL = url; // use last registry url

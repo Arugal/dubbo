@@ -69,16 +69,18 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
             //NOTE: if `invokers` changed, then `invoked` also lose accuracy.
             if (i > 0) {
                 checkWhetherDestroyed();
+                // 在进行重试前重新列举Invoker,这样做的好处是如果某个服务挂了，通过调用list可得到最新可用的Invoker列表
                 copyinvokers = list(invocation);
                 // check again
-                checkInvokers(copyinvokers, invocation);
+                checkInvokers(copyinvokers, invocation); // 判空检查
             }
+            // 通过负载均衡选择 Invoker
             Invoker<T> invoker = select(loadbalance, invocation, copyinvokers, invoked);
             invoked.add(invoker);
             RpcContext.getContext().setInvokers((List) invoked);
             try {
                 Result result = invoker.invoke(invocation);
-                if (le != null && logger.isWarnEnabled()) {
+                if (le != null && logger.isWarnEnabled()) { // 告警:打印重试成功前的异常
                     logger.warn("Although retry the method " + methodName
                             + " in the service " + getInterface().getName()
                             + " was successful by the provider " + invoker.getUrl().getAddress()
@@ -101,6 +103,7 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 providers.add(invoker.getUrl().getAddress());
             }
         }
+        // 重试失败
         throw new RpcException(le != null ? le.getCode() : 0, "Failed to invoke the method "
                 + methodName + " in the service " + getInterface().getName()
                 + ". Tried " + len + " times of the providers " + providers

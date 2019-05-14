@@ -21,6 +21,8 @@ import org.apache.dubbo.common.Node;
 /**
  * Invoker. (API/SPI, Prototype, ThreadSafe)
  *
+ * Proxy
+ *
  * Invoker 是实体域，是 Dubbo 的核心模型，其他模型都向它靠拢，或转换成它
  * 它代表一个可执行体，可向它发起 invoke 调用
  * 它有可能是一个本地的实现，也可能是一个远程的调用，也可能是一个集群实现
